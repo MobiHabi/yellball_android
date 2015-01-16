@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">YellBall</string>
+    <string name="message_info_header">Audio message info</string>
+    <string name="message_title">Title</string>
+    <string name="message_description">Description</string>
+    <string name="message_duration">Duration</string>
+    <string name="message_author">Author</string>
+    <string name="message_created">Created</string>
+    <string name="message_reply_to">Reply to</string>
+    <string name="message_send">Send</string>
+    <string name="message_reply">Reply</string>
+    <string name="message_back_to_record">Back to record</string>
+    <string name="menu_item_play">Play</string>
+    <string name="menu_item_record_again">Record again</string>
+    <string name="menu_item_settings">Settings</string>
+    <string name="menu_item_leave">Leave</string>
+
+    <bool name="show_countdown">false</bool>
+
+    <integer name="record_image_alpha">100</integer>
+    <integer name="info_image_alpha">100</integer>
+    <integer name="countdown_text_size_in_sp">150</integer>
+    <integer name="countdown_text_color">0xffffee70</integer>
+    <integer name="countdown_start_value">5</integer>
+    <integer name="sound_histogram_color">0xffeeeeee</integer>
+    <integer name="max_record_duration_ms">10000</integer>
+    <integer name="menu_image_alpha">100</integer>
+
+    <dimen name="record_image_size">150dp</dimen>
+    <dimen name="send_image_size">60dp</dimen>
+    <dimen name="title_size">20sp</dimen>
+    <dimen name="description_size">18sp</dimen>
+    <dimen name="divider_width">1dp</dimen>
+    <dimen name="description_max_height">100dp</dimen>
+    <dimen name="timing_label_size">18sp</dimen>
+    <dimen name="timing_icon_size">32dp</dimen>
+    <dimen name="menu_button_size">50dp</dimen>
+
+    <drawable name="divider_color">#ff777777</drawable>
+</resources>
