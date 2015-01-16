@@ -9,7 +9,7 @@ import android.widget.FrameLayout;
 import android.widget.TextView;
 import ru.android.yellball.R;
 import ru.android.yellball.bo.AudioMessage;
-import ru.android.yellball.bo.AudioMessageUtil;
+import ru.android.yellball.utils.AudioMessageUtil;
 
 /**
  * Created by user on 08.01.2015.

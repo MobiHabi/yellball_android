@@ -11,7 +11,7 @@ import android.view.animation.AnimationUtils;
 import android.widget.*;
 import ru.android.yellball.R;
 import ru.android.yellball.bo.AudioMessage;
-import ru.android.yellball.bo.AudioMessageUtil;
+import ru.android.yellball.utils.AudioMessageUtil;
 import ru.android.yellball.utils.ContextParamsUtil;
 
 /**
