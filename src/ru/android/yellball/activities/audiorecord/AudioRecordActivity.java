@@ -7,7 +7,6 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuInflater;
-import android.widget.ViewFlipper;
 import ru.android.yellball.R;
 import ru.android.yellball.fragments.messages.MessagesFragment;
 import ru.android.yellball.fragments.recorder.RecorderFragment;
@@ -19,9 +18,7 @@ import ru.android.yellball.fragments.settings.SettingsFragment;
  * Created by user on 22.12.2014.
  */
 public class AudioRecordActivity extends ActionBarActivity {
-    private ViewFlipper viewFlipper;
-    private AudioInfoView audioInfoView;
-    private AudioRecordView audioRecordView;
+    private SimpleCurrentMessageProvider simpleCurrentMessageProvider = new SimpleCurrentMessageProvider();
 
     /**
      * @see android.app.Activity#onCreate(android.os.Bundle)
@@ -43,7 +40,7 @@ public class AudioRecordActivity extends ActionBarActivity {
         ActionBar.Tab settingsTab = actionBar.newTab().setText(R.string.settings_tab).setTabListener(new TabListener(new SettingsFragment(), "settings"));
         actionBar.addTab(settingsTab);
 
-        ActionBar.Tab recordTab = actionBar.newTab().setText("Record").setTabListener(new TabListener(new RecorderFragment(), "record"));
+        ActionBar.Tab recordTab = actionBar.newTab().setText("Record").setTabListener(new TabListener(new RecorderFragment(simpleCurrentMessageProvider), "record"));
         actionBar.addTab(recordTab);
     }
 
