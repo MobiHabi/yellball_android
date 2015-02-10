@@ -1,4 +1,4 @@
-package ru.android.yellball.activities.audiorecord;
+package ru.android.yellball.fragments.recorder;
 
 import android.content.Context;
 import android.graphics.Canvas;
@@ -6,7 +6,6 @@ import android.graphics.Paint;
 import android.graphics.Path;
 import android.util.AttributeSet;
 import android.view.View;
-import ru.android.yellball.utils.ContextParamsUtil;
 
 /**
  * View, that works as a canvas to display a sound histogram.
@@ -17,6 +16,8 @@ public class HistogramView extends View {
     private byte[] buffer;
     private int bytesCount;
     private Paint paintSettings;
+
+    private int histColor = 0xffffffff;
 
     public HistogramView(Context context) {
         super(context);
@@ -74,6 +75,10 @@ public class HistogramView extends View {
         invalidate();
     }
 
+    public void setHistColor(int histColor) {
+        this.histColor = histColor;
+    }
+
     /**
      * Creates and returns an object of {@link android.graphics.Paint}.
      *
@@ -88,7 +93,7 @@ public class HistogramView extends View {
         paintSettings.setAntiAlias(true);
         paintSettings.setStyle(Paint.Style.STROKE);
         paintSettings.setStrokeWidth(1);
-        paintSettings.setColor(ContextParamsUtil.getSoundHistogramColor(getContext()));
+        paintSettings.setColor(histColor);
         return paintSettings;
     }
 }

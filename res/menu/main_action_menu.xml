@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:id="@+id/action1" android:title="Test title" android:showAsAction="withText|ifRoom"/>
+    <item android:id="@+id/action2" android:icon="@drawable/perm_group_accounts" android:title="11111"
+          android:showAsAction="withText|ifRoom"/>
+    <item android:id="@+id/action3" android:icon="@drawable/perm_group_app_info" android:title="22222"
+          android:showAsAction="withText|ifRoom"/>
+    <item android:id="@+id/action4" android:icon="@drawable/perm_group_calendar" android:title="33333"
+          android:showAsAction="withText|ifRoom"/>
+    <item android:id="@+id/action5" android:icon="@drawable/perm_group_device_alarms" android:title="44444"
+          android:showAsAction="withText|ifRoom"/>
+    <item android:id="@+id/action6" android:icon="@drawable/perm_group_display" android:title="55555"
+          android:showAsAction="withText|ifRoom"/>
+    <item android:id="@+id/action7" android:icon="@drawable/perm_group_microphone" android:title="66666"
+          android:showAsAction="withText|ifRoom"/>
+</menu>

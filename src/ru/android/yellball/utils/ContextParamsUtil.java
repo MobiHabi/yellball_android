@@ -7,8 +7,8 @@ import ru.android.yellball.R;
  * Created by user on 29.12.2014.
  */
 public class ContextParamsUtil {
-    static public boolean isCountdownOn(Context context) {
-        return context.getResources().getBoolean(R.bool.show_countdown);
+    static public boolean isCountdownOnDefaultValue(Context context) {
+        return context.getResources().getBoolean(R.bool.dv_show_countdown);
     }
 
     static public int getRecordButtonAlpha(Context context) {

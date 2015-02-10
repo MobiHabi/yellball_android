@@ -1,0 +1,9 @@
+<component name="ArtifactManager">
+  <artifact type="jar" name="appcompat:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/appcompat_jar</output-path>
+    <root id="archive" name="appcompat.jar">
+      <element id="module-output" name="appcompat" />
+      <element id="android-final-package" facet="appcompat/android/Android" />
+    </root>
+  </artifact>
+</component>

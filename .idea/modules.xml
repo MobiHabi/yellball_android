@@ -3,6 +3,7 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/YellBall.iml" filepath="$PROJECT_DIR$/YellBall.iml" />
+      <module fileurl="file://$USER_HOME$/Documents/android/adt-bundle-windows-x86_64-20140702/adt-bundle-windows-x86_64-20140702/sdk/extras/android/support/v7/appcompat/appcompat.iml" filepath="$USER_HOME$/Documents/android/adt-bundle-windows-x86_64-20140702/adt-bundle-windows-x86_64-20140702/sdk/extras/android/support/v7/appcompat/appcompat.iml" />
     </modules>
   </component>
 </project>

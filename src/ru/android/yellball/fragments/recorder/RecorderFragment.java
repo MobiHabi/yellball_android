@@ -1,27 +1,32 @@
-package ru.android.yellball.activities.audiorecord;
+package ru.android.yellball.fragments.recorder;
 
-import android.content.Context;
 import android.os.AsyncTask;
-import android.util.AttributeSet;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
 import android.util.Log;
 import android.util.TypedValue;
+import android.view.LayoutInflater;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.ViewGroup;
 import android.view.animation.AnimationUtils;
 import android.widget.*;
 import ru.android.yellball.R;
+import ru.android.yellball.activities.audiorecord.PopupMenuFactory;
 import ru.android.yellball.bo.AudioMessage;
 import ru.android.yellball.bo.Settings;
-import ru.android.yellball.fragments.recorder.*;
+import ru.android.yellball.managers.CurrentMessageProvider;
+import ru.android.yellball.managers.SettingsManager;
 import ru.android.yellball.utils.AudioMessageUtil;
 import ru.android.yellball.utils.ContextParamsUtil;
 import ru.android.yellball.utils.FormatterUtil;
 import ru.android.yellball.utils.PCMUtil;
 
 /**
- * Created by user on 03.01.2015.
+ * Created by user on 07.02.2015.
  */
-public class AudioRecordView extends FrameLayout implements AudioRecorderListener, AudioPlayerListener {
+public class RecorderFragment extends Fragment implements AudioRecorderListener, AudioPlayerListener {
     static private final int RECORD_DATA_PART_SIZE = PCMUtil.BYTES_PER_FRAME * 500;
 
     private Settings settings;
@@ -40,28 +45,57 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
     private View timingView;
     private ImageView timingIcon;
     private TextView timingLabel;
-    private ImageView menuButton;
 
-    private AudioMessage audioMessage;
+    private CurrentMessageProvider currentMessageProvider;
 
-    private AudioRecordListener audioRecordListener;
-
-    public AudioRecordView(Context context, AudioRecordListener audioRecordListener) {
-        super(context);
-        this.audioRecordListener = audioRecordListener;
-        construct();
+    public RecorderFragment(CurrentMessageProvider currentMessageProvider) {
+        this.currentMessageProvider = currentMessageProvider;
     }
 
-    public AudioRecordView(Context context, AttributeSet attrs, AudioRecordListener audioRecordListener) {
-        super(context, attrs);
-        this.audioRecordListener = audioRecordListener;
-        construct();
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        settings = SettingsManager.readSettings(getActivity());
+
+        View view = inflater.inflate(R.layout.audiorecord, container, false);
+
+        audioRecorder = new AudioRecorder(this);
+        audioPlayer = new AudioPlayer(this);
+
+        histogramView = (HistogramView) view.findViewById(R.id.histogram);
+
+        countdownSwitcher = (TextSwitcher) view.findViewById(R.id.countdown);
+        countdownSwitcher.setFactory(new CountdownViewFactory());
+        countdownSwitcher.setInAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
+        countdownSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
+
+        playerButton = (ImageSwitcher) view.findViewById(R.id.playerButton);
+        playerButton.setFactory(new RecordButtonViewFactory());
+        playerButton.setInAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_in));
+        playerButton.setOutAnimation(AnimationUtils.loadAnimation(getActivity(), android.R.anim.fade_out));
+        playerButton.setOnClickListener(new RecordButtonListener());
+
+        infoButton = (ImageView) view.findViewById(R.id.infoButton);
+        infoButton.setAlpha(ContextParamsUtil.getInfoButtonAlpha(getActivity()));
+        infoButton.setOnClickListener(new InfoButtonListener());
+
+        View gestureView = view.findViewById(R.id.gestureView);
+        gestureView.setOnTouchListener(new SwipeListener());
+
+        timingView = view.findViewById(R.id.timingView);
+        timingIcon = (ImageView) view.findViewById(R.id.timingIcon);
+        timingLabel = (TextView) view.findViewById(R.id.timingLabel);
+
+        initialize();
+
+        return view;
     }
 
-    public AudioRecordView(Context context, AttributeSet attrs, int defStyle, AudioRecordListener audioRecordListener) {
-        super(context, attrs, defStyle);
-        this.audioRecordListener = audioRecordListener;
-        construct();
+    @Override
+    public void onDestroyView() {
+        super.onDestroyView();
+
+        disposeCountdown();
+        disposeAudio();
     }
 
     /**
@@ -94,27 +128,10 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
         return state;
     }
 
-    /**
-     * Method clears all data and closes all resources correctly.
-     * Note: Can be called many times simultaneously and work correctly.
-     */
-    public void disposeAll() {
-        disposeCountdown();
-        disposeAudio();
-    }
-
-    public AudioMessage getAudioMessage() {
-        return audioMessage;
-    }
-
-    public void setAudioMessage(AudioMessage audioMessage) {
-        this.audioMessage = audioMessage;
-    }
-
     @Override
     public void onGetDataChunk(byte[] data, int size, long totalRecordedMs) {
         histogramView.setBuffer(data, size);
-        writeFormattedTiming(totalRecordedMs, ContextParamsUtil.getMaxRecordDurationInMs(getContext()));
+        writeFormattedTiming(totalRecordedMs, ContextParamsUtil.getMaxRecordDurationInMs(getActivity()));
     }
 
     @Override
@@ -125,7 +142,7 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
     @Override
     public void onWriteDataChunk(AudioMessage audioMessage, byte[] data, int size, long totalPlayedMs) {
         histogramView.setBuffer(data, size);
-        writeFormattedTiming(totalPlayedMs, this.audioMessage.getDuration());
+        writeFormattedTiming(totalPlayedMs, audioMessage.getDuration());
     }
 
     @Override
@@ -133,47 +150,11 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
         setState(AudioRecordState.STOPPED);
     }
 
-    private void construct() {
-        inflate(getContext(), R.layout.audiorecord, this);
-
-        audioRecorder = new AudioRecorder(this);
-        audioPlayer = new AudioPlayer(this);
-
-        histogramView = (HistogramView) findViewById(R.id.histogram);
-
-        countdownSwitcher = (TextSwitcher) findViewById(R.id.countdown);
-        countdownSwitcher.setFactory(new CountdownViewFactory());
-        countdownSwitcher.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
-        countdownSwitcher.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
-
-        playerButton = (ImageSwitcher) findViewById(R.id.playerButton);
-        playerButton.setFactory(new RecordButtonViewFactory());
-        playerButton.setInAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_in));
-        playerButton.setOutAnimation(AnimationUtils.loadAnimation(getContext(), android.R.anim.fade_out));
-        playerButton.setOnClickListener(new RecordButtonListener());
-
-        infoButton = (ImageView) findViewById(R.id.infoButton);
-        infoButton.setAlpha(ContextParamsUtil.getInfoButtonAlpha(getContext()));
-        infoButton.setOnClickListener(new InfoButtonListener());
-
-        View gestureView = findViewById(R.id.gestureView);
-        gestureView.setOnTouchListener(new SwipeListener());
-
-        timingView = findViewById(R.id.timingView);
-        timingIcon = (ImageView) findViewById(R.id.timingIcon);
-        timingLabel = (TextView) findViewById(R.id.timingLabel);
-
-        menuButton = (ImageView) findViewById(R.id.menuButton);
-        menuButton.setAlpha(ContextParamsUtil.getMenuButtonAlpha(getContext()));
-        menuButton.setOnClickListener(new MenuButtonListener());
-
-        initialize();
-    }
-
     /**
      * Initializes an activity. Supposed to be called only once, when creating.
      */
     private void initialize() {
+        AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
         if (!AudioMessageUtil.isPersisted(audioMessage)) {
             state = AudioRecordState.INITIAL;
 
@@ -194,7 +175,7 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
     private void startCountdown() {
         if (state == AudioRecordState.INITIAL) {
             if (settings.isShowCountdown()) {
-                int startCountdownValue = ContextParamsUtil.getCountdownStartValue(getContext());
+                int startCountdownValue = ContextParamsUtil.getCountdownStartValue(getActivity());
                 countdownTask = new CountdownTask();
                 countdownTask.execute(startCountdownValue);
 
@@ -220,6 +201,7 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
      * Method starts or resumes playing audio file.
      */
     private void play() {
+        AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
         if ((state == AudioRecordState.PAUSED || state == AudioRecordState.STOPPED) && AudioMessageUtil.isRecorded(audioMessage)) {
             if (state == AudioRecordState.STOPPED) {
                 final int PLAY_STRIDE_IN_MS = 100;
@@ -242,9 +224,9 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
         if (state == AudioRecordState.COUNTDOWN_TO_RECORD && settings.isShowCountdown() || state == AudioRecordState.INITIAL && !settings.isShowCountdown()) {
             countdownTask = null;
 
-            if (audioMessage == null) audioMessage = new AudioMessage();
+            AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
 
-            int maxRecordDurationInMs = ContextParamsUtil.getMaxRecordDurationInMs(getContext());
+            int maxRecordDurationInMs = ContextParamsUtil.getMaxRecordDurationInMs(getActivity());
             audioRecorder.record(audioMessage, maxRecordDurationInMs, RECORD_DATA_PART_SIZE);
 
             state = AudioRecordState.RECORDING;
@@ -256,26 +238,27 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
      * Method stops recording an audio audioMessage.
      */
     private void stop() {
+        AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
         writeFormattedTiming(0, audioMessage.getDuration());
 
         state = AudioRecordState.STOPPED;
         updateControlsState();
     }
 
-    /**
-     * Method moves to a message information.
-     */
-    private void navigateToInfo() {
-        audioRecordListener.onShowAudioMessageInfo(audioMessage);
-    }
-
-    private void showSettings() {
-        // TODO
-    }
-
-    private void leave() {
-        // TODO
-    }
+//    /**
+//     * Method moves to a message information.
+//     */
+//    private void navigateToInfo() {
+//        audioRecordListener.onShowAudioMessageInfo(audioMessage);
+//    }
+//
+//    private void showSettings() {
+//        // TODO
+//    }
+//
+//    private void leave() {
+//        // TODO
+//    }
 
     private void disposeCountdown() {
         if (countdownTask != null) {
@@ -301,7 +284,6 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                 infoButton.setVisibility(View.VISIBLE);
                 timingView.setVisibility(View.GONE);
                 histogramView.setVisibility(View.GONE);
-                menuButton.setVisibility(View.VISIBLE);
                 break;
             case COUNTDOWN_TO_RECORD:
                 countdownSwitcher.setVisibility(View.VISIBLE);
@@ -309,7 +291,6 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                 infoButton.setVisibility(View.GONE);
                 timingView.setVisibility(View.GONE);
                 histogramView.setVisibility(View.GONE);
-                menuButton.setVisibility(View.GONE);
                 break;
             case RECORDING:
                 countdownSwitcher.setVisibility(View.GONE);
@@ -319,7 +300,6 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                 timingView.setVisibility(View.VISIBLE);
                 timingIcon.setImageResource(R.drawable.ic_media_record);
                 histogramView.setVisibility(View.VISIBLE);
-                menuButton.setVisibility(View.GONE);
                 break;
             case STOPPED:
                 countdownSwitcher.setVisibility(View.GONE);
@@ -329,7 +309,6 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                 timingView.setVisibility(View.VISIBLE);
                 timingIcon.setImageResource(R.drawable.ic_media_play);
                 histogramView.setVisibility(View.GONE);
-                menuButton.setVisibility(View.VISIBLE);
                 break;
             case PLAYING:
                 countdownSwitcher.setVisibility(View.GONE);
@@ -339,7 +318,6 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                 timingView.setVisibility(View.VISIBLE);
                 timingIcon.setImageResource(R.drawable.ic_media_play);
                 histogramView.setVisibility(View.VISIBLE);
-                menuButton.setVisibility(View.GONE);
                 break;
             case PAUSED:
                 countdownSwitcher.setVisibility(View.GONE);
@@ -349,7 +327,6 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                 timingView.setVisibility(View.VISIBLE);
                 timingIcon.setImageResource(R.drawable.ic_media_play);
                 histogramView.setVisibility(View.GONE);
-                menuButton.setVisibility(View.VISIBLE);
                 break;
         }
     }
@@ -371,10 +348,10 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
     private class CountdownViewFactory implements ViewSwitcher.ViewFactory {
         @Override
         public View makeView() {
-            int textSize = ContextParamsUtil.getCountdownTextSize(getContext());
-            int textColor = ContextParamsUtil.getCountdownTextColor(getContext());
+            int textSize = ContextParamsUtil.getCountdownTextSize(getActivity());
+            int textColor = ContextParamsUtil.getCountdownTextColor(getActivity());
 
-            TextView view = new TextView(getContext());
+            TextView view = new TextView(getActivity());
             view.setTextSize(TypedValue.COMPLEX_UNIT_SP, textSize);
             view.setTextColor(textColor);
             return view;
@@ -387,10 +364,10 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
     private class RecordButtonViewFactory implements ViewSwitcher.ViewFactory {
         @Override
         public View makeView() {
-            float size = ContextParamsUtil.getRecordButtonSize(getContext());
-            int alpha = ContextParamsUtil.getRecordButtonAlpha(getContext());
+            float size = ContextParamsUtil.getRecordButtonSize(getActivity());
+            int alpha = ContextParamsUtil.getRecordButtonAlpha(getActivity());
 
-            ImageView view = new ImageView(getContext());
+            ImageView view = new ImageView(getActivity());
             view.setAlpha(alpha);
             view.setScaleType(ImageView.ScaleType.FIT_XY);
             view.setMinimumWidth((int) size);
@@ -433,24 +410,25 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
     private class InfoButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            navigateToInfo();
+//            navigateToInfo();
         }
     }
 
     /**
      * Listener, which handles click on menu button.
      */
-    private class MenuButtonListener implements OnClickListener {
+    private class MenuButtonListener implements View.OnClickListener {
         @Override
-        public void onClick(View v) {
+        public void onClick(View v) { // TODO
+            AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
             if (state == AudioRecordState.INITIAL || state == AudioRecordState.PAUSED || state == AudioRecordState.STOPPED) {
                 PopupMenu popupMenu;
                 if (AudioMessageUtil.isPersisted(audioMessage)) {
-                    popupMenu = PopupMenuFactory.create(getContext(), v, R.menu.audiorecord_stopped, new AudioRecordMenuListener());
+                    popupMenu = PopupMenuFactory.create(getActivity(), v, R.menu.audiorecord_stopped, new AudioRecordMenuListener());
                 } else if (AudioMessageUtil.isRecorded(audioMessage)) {
-                    popupMenu = PopupMenuFactory.create(getContext(), v, R.menu.audiorecord_stopped_new, new AudioRecordMenuListener());
+                    popupMenu = PopupMenuFactory.create(getActivity(), v, R.menu.audiorecord_stopped_new, new AudioRecordMenuListener());
                 } else {
-                    popupMenu = PopupMenuFactory.create(getContext(), v, R.menu.audiorecord_no_record, new AudioRecordMenuListener());
+                    popupMenu = PopupMenuFactory.create(getActivity(), v, R.menu.audiorecord_no_record, new AudioRecordMenuListener());
                 }
                 popupMenu.show();
             }
@@ -462,7 +440,8 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
      */
     private class AudioRecordMenuListener implements PopupMenu.OnMenuItemClickListener {
         @Override
-        public boolean onMenuItemClick(MenuItem item) {
+        public boolean onMenuItemClick(MenuItem item) { // TODO
+            AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
             switch (item.getItemId()) {
                 case R.id.menu_play: // Play
                     if (AudioMessageUtil.isRecorded(audioMessage)) {
@@ -476,10 +455,10 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                     }
                     return true;
                 case R.id.menu_settings: // Settings
-                    showSettings();
+//                    showSettings();
                     return true;
                 case R.id.menu_leave: // Leave
-                    leave();
+//                    leave();
                     return true;
             }
 
@@ -498,10 +477,10 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
                     play();
                     return true;
                 case 1: // Settings
-                    showSettings();
+//                    showSettings();
                     return true;
                 case 2: // Leave
-                    leave();
+//                    leave();
                     return true;
             }
 
@@ -514,19 +493,19 @@ public class AudioRecordView extends FrameLayout implements AudioRecorderListene
      */
     private class SwipeListener extends OnSwipeTouchListener {
         public SwipeListener() {
-            super(getContext());
+            super(getActivity());
         }
 
         @Override
         public void onSwipeLeft() {
             super.onSwipeLeft();
-            if (isSwipeDetecting()) navigateToInfo();
+//            if (isSwipeDetecting()) navigateToInfo();
         }
 
         @Override
         public void onSwipeRight() {
             super.onSwipeRight();
-            if (isSwipeDetecting()) navigateToInfo();
+//            if (isSwipeDetecting()) navigateToInfo();
         }
 
         private boolean isSwipeDetecting() {

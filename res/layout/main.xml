@@ -16,5 +16,12 @@
             android:clickable="true"
             android:id="@+id/gestureOverlayView">
     </android.gesture.GestureOverlayView>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textAppearance="?android:attr/textAppearanceSmall"
+            android:text="@string/density"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"/>
 </RelativeLayout>
 

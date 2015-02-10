@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:orientation="horizontal"
+              android:layout_width="fill_parent"
+              android:layout_height="wrap_content"
+              android:padding="2dp">
+
+    <ImageView
+            android:layout_width="@dimen/avatar_size"
+            android:layout_height="@dimen/avatar_size"
+            android:src="@drawable/dummy_avatar"
+            android:id="@+id/avatar"/>
+    <LinearLayout
+            android:layout_width="fill_parent"
+            android:layout_height="fill_parent"
+            android:layout_weight="1"
+            android:layout_marginLeft="5dp"
+            android:padding="3dp"
+            android:orientation="vertical">
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="fill_parent"
+                android:layout_weight="1"
+                android:gravity="center_vertical"
+                android:textSize="20sp"
+                android:text="Title"
+                android:id="@+id/title"/>
+        <TextView
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:textSize="12sp"
+                android:text="Author"
+                android:id="@+id/author"/>
+        <LinearLayout
+                android:layout_width="fill_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal">
+            <TextView
+                    android:layout_width="fill_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:text="02.02.2015 23:31"
+                    android:id="@+id/created"/>
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="right"
+                    android:textSize="12sp"
+                    android:text="0:00.0"
+                    android:id="@+id/duration"/>
+        </LinearLayout>
+    </LinearLayout>
+</LinearLayout>

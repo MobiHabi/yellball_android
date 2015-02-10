@@ -1,23 +1,24 @@
-package ru.android.yellball.activities.audiorecord;
+package ru.android.yellball.fragments.messageinfo;
 
-import android.content.Context;
-import android.util.AttributeSet;
+import android.os.Bundle;
+import android.support.annotation.Nullable;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
 import android.view.View;
+import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.TextView;
 import ru.android.yellball.R;
 import ru.android.yellball.bo.AudioMessage;
+import ru.android.yellball.managers.CurrentMessageProvider;
 import ru.android.yellball.utils.AudioMessageUtil;
 import ru.android.yellball.utils.FormatterUtil;
 
 /**
- * Created by user on 08.01.2015.
+ * Created by user on 11.02.2015.
  */
-public class AudioInfoView extends FrameLayout {
-    private AudioMessage audioMessage;
-
+public class MessageInfoFragment extends Fragment {
     private EditText messageTitle;
     private EditText messageDescription;
     private TextView messageDuration;
@@ -28,55 +29,34 @@ public class AudioInfoView extends FrameLayout {
     private Button sendOrReplyButton;
     private Button backToRecordButton;
 
-    private AudioInfoListener audioInfoListener;
+    private CurrentMessageProvider currentMessageProvider;
 
-    public AudioInfoView(Context context, AudioInfoListener audioInfoListener) {
-        super(context);
-        this.audioInfoListener = audioInfoListener;
-        construct();
+    public MessageInfoFragment(CurrentMessageProvider currentMessageProvider) {
+        this.currentMessageProvider = currentMessageProvider;
     }
 
-    public AudioInfoView(Context context, AttributeSet attrs, AudioInfoListener audioInfoListener) {
-        super(context, attrs);
-        this.audioInfoListener = audioInfoListener;
-        construct();
-    }
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.audioinfo, container, false);
 
-    public AudioInfoView(Context context, AttributeSet attrs, int defStyle, AudioInfoListener audioInfoListener) {
-        super(context, attrs, defStyle);
-        this.audioInfoListener = audioInfoListener;
-        construct();
-    }
+        messageTitle = (EditText) view.findViewById(R.id.messageTitle);
+        messageDescription = (EditText) view.findViewById(R.id.messageDescription);
+        messageDuration = (TextView) view.findViewById(R.id.messageDuration);
+        messageAuthor = (TextView) view.findViewById(R.id.messageAuthor);
+        replyToLabel = (TextView) view.findViewById(R.id.replyToLabel);
+        messageCreated = (TextView) view.findViewById(R.id.messageCreated);
+        messageReplyTo = (TextView) view.findViewById(R.id.replyTo);
 
-    private void construct() {
-        inflate(getContext(), R.layout.audioinfo, this);
-
-        messageTitle = (EditText) findViewById(R.id.messageTitle);
-        messageDescription = (EditText) findViewById(R.id.messageDescription);
-        messageDuration = (TextView) findViewById(R.id.messageDuration);
-        messageAuthor = (TextView) findViewById(R.id.messageAuthor);
-        replyToLabel = (TextView) findViewById(R.id.replyToLabel);
-        messageCreated = (TextView) findViewById(R.id.messageCreated);
-        messageReplyTo = (TextView) findViewById(R.id.replyTo);
-
-        sendOrReplyButton = (Button) findViewById(R.id.sendOrReplyMessage);
+        sendOrReplyButton = (Button) view.findViewById(R.id.sendOrReplyMessage);
         sendOrReplyButton.setOnClickListener(new SendOrReplyButtonListener());
-        backToRecordButton = (Button) findViewById(R.id.backToRecord);
+        backToRecordButton = (Button) view.findViewById(R.id.backToRecord);
         backToRecordButton.setOnClickListener(new BackToRecordButtonListener());
-    }
 
-
-    public AudioMessage getAudioMessage() {
-        return audioMessage;
-    }
-
-    public void setAudioMessage(AudioMessage audioMessage) {
-        this.audioMessage = audioMessage;
-
-        writeMessageData();
+        return view;
     }
 
     private void readMessageData() {
+        AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
         if (!AudioMessageUtil.isPersisted(audioMessage)) {
             audioMessage.setTitle(messageTitle.getText().toString());
             audioMessage.setDescription(messageDescription.getText().toString());
@@ -84,6 +64,8 @@ public class AudioInfoView extends FrameLayout {
     }
 
     private void writeMessageData() {
+        AudioMessage audioMessage = currentMessageProvider.getCurrentMessage();
+
         messageTitle.setText(audioMessage.getTitle());
         messageDescription.setText(audioMessage.getDescription());
         messageDuration.setText(audioMessage.getDuration() > 0 ? FormatterUtil.formatDuration(audioMessage.getDuration()) : "");
@@ -101,7 +83,7 @@ public class AudioInfoView extends FrameLayout {
     /**
      * Listener, which handles click on button 'Send' or 'Reply'.
      */
-    private class SendOrReplyButtonListener implements OnClickListener {
+    private class SendOrReplyButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
             readMessageData();
@@ -113,11 +95,11 @@ public class AudioInfoView extends FrameLayout {
     /**
      * Listener, which handles 'Back to record' button click.
      */
-    private class BackToRecordButtonListener implements OnClickListener {
+    private class BackToRecordButtonListener implements View.OnClickListener {
         @Override
         public void onClick(View v) {
-            readMessageData();
-            audioInfoListener.onReturnToAudioRecord(audioMessage);
+            readMessageData();// TODO
+//            audioInfoListener.onReturnToAudioRecord(audioMessage);
         }
     }
 }

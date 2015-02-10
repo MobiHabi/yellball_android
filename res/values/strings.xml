@@ -16,7 +16,8 @@
     <string name="menu_item_settings">Settings</string>
     <string name="menu_item_leave">Leave</string>
 
-    <bool name="show_countdown">false</bool>
+    <!-- Default values for settings -->
+    <bool name="dv_show_countdown">false</bool>
 
     <integer name="record_image_alpha">100</integer>
     <integer name="info_image_alpha">100</integer>
@@ -36,6 +37,7 @@
     <dimen name="timing_label_size">18sp</dimen>
     <dimen name="timing_icon_size">32dp</dimen>
     <dimen name="menu_button_size">50dp</dimen>
+    <dimen name="avatar_size">70dp</dimen>
 
     <drawable name="divider_color">#ff777777</drawable>
 </resources>

@@ -1,4 +1,4 @@
-package ru.android.yellball.activities.audiorecord;
+package ru.android.yellball.fragments.recorder;
 
 import ru.android.yellball.bo.AudioMessage;
 

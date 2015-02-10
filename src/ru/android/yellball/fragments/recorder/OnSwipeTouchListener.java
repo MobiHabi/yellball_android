@@ -1,4 +1,4 @@
-package ru.android.yellball.activities.audiorecord;
+package ru.android.yellball.fragments.recorder;
 
 import android.content.Context;
 import android.util.Log;

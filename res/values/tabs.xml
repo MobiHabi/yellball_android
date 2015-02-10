@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="messages_tab">Messages</string>
+    <string name="new_message_tab">New message</string>
+    <string name="settings_tab">Settings</string>
+</resources>

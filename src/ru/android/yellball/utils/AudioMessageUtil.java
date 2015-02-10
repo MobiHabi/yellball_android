@@ -11,6 +11,6 @@ public class AudioMessageUtil {
     }
 
     static public boolean isRecorded(AudioMessage audioMessage) {
-        return (audioMessage.getData() != null && audioMessage.getData().length > 0);
+        return (audioMessage != null && audioMessage.getData() != null && audioMessage.getData().length > 0);
     }
 }

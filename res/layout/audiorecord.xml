@@ -1,12 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
              android:layout_width="fill_parent"
-             android:layout_height="fill_parent">
+             android:layout_height="fill_parent"
+             android:background="#ff000000">
     <!-- Background -->
     <view android:layout_width="fill_parent"
           android:layout_height="fill_parent"
-          android:visibility="invisible"
-          class="ru.android.yellball.activities.audiorecord.HistogramView" android:id="@+id/histogram"
+          android:visibility="visible"
+          class="ru.android.yellball.fragments.recorder.HistogramView" android:id="@+id/histogram"
+          android:background="#ff000000"
           android:layout_gravity="center"/>
 
     <!-- Foreground -->
@@ -17,22 +19,13 @@
                 android:layout_centerHorizontal="true"
                 android:layout_centerVertical="true"
                 android:layout_centerInParent="true"
-                android:visibility="invisible"
+                android:visibility="visible"
                 android:id="@+id/countdown" android:layout_gravity="center_horizontal"/>
     </RelativeLayout>
     <RelativeLayout
             android:layout_width="fill_parent"
             android:layout_height="fill_parent"
             android:id="@+id/gestureView">
-        <ImageView android:layout_width="@dimen/menu_button_size"
-                   android:layout_height="@dimen/menu_button_size"
-                   android:layout_alignParentTop="true"
-                   android:layout_alignParentRight="true"
-                   android:src="@drawable/ic_menu"
-                   android:clickable="true"
-                   android:layout_gravity="right"
-                   android:id="@+id/menuButton"/>
-
         <ImageSwitcher android:layout_width="@dimen/record_image_size"
                        android:layout_height="@dimen/record_image_size"
                        android:layout_centerHorizontal="true"

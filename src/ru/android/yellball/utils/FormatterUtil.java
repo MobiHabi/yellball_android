@@ -1,4 +1,4 @@
-package ru.android.yellball.activities.audiorecord;
+package ru.android.yellball.utils;
 
 import java.text.SimpleDateFormat;
 import java.util.Date;
